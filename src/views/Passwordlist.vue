@@ -8,7 +8,7 @@
 export default {
   data(){
     return {
-      message:'my-password-system'
+      message:'my-password-systemD大调'
     }
   }
 }
