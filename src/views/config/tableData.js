@@ -1,0 +1,27 @@
+export default [
+  {
+    platform:'1',
+    account:"李海松",
+    password:30,
+    email:400,
+    phone:22,
+    description:''
+  },
+  {
+    id:'2',
+    platform:'1',
+    account:"李海松",
+    password:30,
+    email:400,
+    phone:22,
+    description:''
+  },
+  {
+    platform:'1',
+    account:"李海松",
+    password:30,
+    email:400,
+    phone:22,
+    description:''
+  }
+]

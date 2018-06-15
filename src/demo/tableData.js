@@ -1,0 +1,20 @@
+export default [
+  {
+    id:'1',
+    name:"李海松",
+    age:30,
+    score:400
+  },
+  {
+    id:'2',
+    name:"李永阳",
+    age:40,
+    score:900
+  },
+  {
+    id:'3',
+    name:"李永英",
+    age:99,
+    score:76
+  }
+]
