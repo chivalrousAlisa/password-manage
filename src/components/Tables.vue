@@ -1,6 +1,12 @@
 /*
 props:
-  columns:[{title:'表格列名',dataKey:'数据来源对应字段',hasSlot:true如果设置true，调用组件时需配置对应名的slot模板, render(rowData,data,index)}]
+  columns:[{
+    title:'表格列名',
+    dataKey:'数据来源对应字段,值为action特例，为操作项',
+    render(rowData,data,index)},
+    actionGroup:‘datakey为action时，[{key:'',value:'', render:function(rowData, data, index)}]}’
+    style:{}
+  }]
   dataSource:[]
   actionGroup:[]
 事件：
@@ -11,20 +17,23 @@ props:
     <table>
       <thead>
         <tr>
-          <th v-for="item in columns">{{item.title}}</th>
-          <th v-if="actionGroup">操作</th>
+          <th v-for="item in columns" :style="item.style">{{item.title}}</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item0, index0) in dataSource">
-          <td v-for="item1 in columns">
-            <slot v-if="item1.hasSlot" :name="item1.dataKey"></slot>
-            <div v-else-if="item1.render && typeof item1.render === 'function'" v-html="item1.render(item0, dataSource, index0)">
+        <tr v-for="(item0, index0) in dataSource" :key="index0">
+          <td v-for="(item1,index1) in columns" :key="index1">
+            <div v-if="item1.render && typeof item1.render === 'function'" v-html="item1.render(item0, dataSource, index0)">
+            </div>
+            <div v-else-if="item1.dataKey === 'action'">
+              <span v-for="action in item1.actionGroup">
+                <a href="javascript:;" @click="$emit('opearateBack',item0, action.key)">
+                  <span v-if="action.render && typeof action.render === 'function'" v-html="action.render(item0, dataSource, index0)"></span>
+                  <span v-else>{{action.value}}</span>
+                </a>&nbsp;
+              </span>
             </div>
             <span v-else>{{item0[item1.dataKey]}}</span>
-          </td>
-          <td v-if="actionGroup">
-            <span v-for="action in actionGroup"><a href="javascript:;" @click="$emit('opearateBack',item0,action.key)">{{action.value}}</a>&nbsp;&nbsp;</span>
           </td>
         </tr>
       </tbody>

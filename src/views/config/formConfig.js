@@ -11,7 +11,7 @@ export default {
   types: {
     platform: 'Text',
     account: 'Text',
-    password: 'Text',
+    password: 'Password',
     email: 'Text',
     phone: 'Text',
     description: 'TEXTAREA'

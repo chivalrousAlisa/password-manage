@@ -14,6 +14,7 @@ props:
         </div>
         <div class="item-content">
           <input type="text" v-if="config['types'][item]==='Text'" v-bind:value="data[item]" v-on:input="$emit('changeBack', $event.target.value, item)">
+          <input type="password" v-else-if="config['types'][item]==='Password'" v-bind:value="data[item]" v-on:input="$emit('changeBack', $event.target.value, item)"/>
           <select v-else-if="config['types'][item]==='Select'" v-bind:value="data[item]" v-on:change="$emit('changeBack', $event.target.value, item)">
             <option v-bind:value="key" v-for="(value, key) in config['options'][item]">{{value}}</option>
           </select>

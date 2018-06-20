@@ -24,10 +24,8 @@
         <tables
           :columns="tableConfig"
           :dataSource="tableData"
-          :actionGroup="actionGroup"
           v-on:opearateBack="onOpearate"
         >
-          <span slot="password">******</span>
         </tables>
       </div>
     </div>
@@ -57,6 +55,31 @@
       title="操作提示"
       :content="modalContent"
     >
+    </modal>
+    <!-- 删除确认框 -->
+    <modal
+      v-bind:isShow="showConfirmModal"
+      type="confirm"
+      v-on:okBack="onConfirmModal"
+      v-on:cancelBack="showConfirmModal=false"
+      title="操作提示"
+      content="您确认要删除吗？"
+    >
+    </modal>
+    <!-- 显示密码弹框 -->
+    <modal
+      v-bind:isShow="showViewModal"
+      type="dialog"
+      v-on:closeBack="showViewModal = false"
+      v-on:okBack="onViewModalOk"
+      v-on:cancelBack="showViewModal = false"
+      title="查看密码"
+      width="400"
+    >
+      <div slot="content">
+        <h3 style="margin-bottom:15px;">查看密码需要服务密码：</h3>
+        <input type="password" v-model="servicePwd"/>
+      </div>
     </modal>
   </div>
 </template>
@@ -97,22 +120,15 @@
   import modal from '../components/Modal';
   import forms from '../components/Forms';
   import axios from 'axios';
+  import { pwdRenderFn } from './config/utils';
   export default {
     data(){
       return {
         formConfig,
         tableConfig,
         tableData:[],
-        actionGroup:[{
-          key:'edit',
-          value:'修改'
-        },{
-          key:'showPwd',
-          value:'显示密码'
-        },{
-          key:'del',
-          value:'删除'
-        }],
+        currentRowData:{},
+        pwdRenderFn,
 
         searchData:{
           account:'',
@@ -125,8 +141,13 @@
         modalContent:'',
 
         formData:{},
+        servicePwd:'',
 
-        showMessageModal:false
+        showMessageModal:false, // 公共
+        showViewModal:false,
+
+        showConfirmModal:false, // 删除确认框
+
       }
     },
     mounted(){
@@ -145,23 +166,51 @@
           this.modalTitle = '新增账户'
         }else if(type === 'edit'){
           this.formData = rowData;
-          this.formData.password = '';
           this.modalTitle = '编辑账户';
         }
         this.showModal = true;
       },
       onOpearate(rowData,operateKey){
-        console.log(rowData,operateKey);
-        if(operateKey === 'showPwd'){
-          const index = this._findIndex('password');
-          this.tableConfig[index].hasSlot = !this.tableConfig[index].hasSlot;
+        this.currentRowData = rowData;
+        if(operateKey === 'togglPwd'){
+          const currentIsHide = rowData.isHidePwd;
+          if (currentIsHide) {
+            this.servicePwd = '';
+            this.showViewModal = true;
+          } else {
+            this.currentRowData.isHidePwd = !this.currentRowData.isHidePwd;
+          }
         } else if (operateKey === 'edit') {
           this.onModifyAccount('edit', rowData);
+        } else if (operateKey === 'del') {
+          this.showConfirmModal = true;
         }
       },
-      _findIndex(dataKey){
-        for(let i = 0; i < this.tableConfig.length; i++){
-          if(this.tableConfig[i].dataKey === dataKey){
+      onViewModalOk(){
+        this._checkAuthority();
+      },
+      onConfirmModal(){
+        this.showConfirmModal = false;
+        this._onDeleteAccount();
+      },
+      // 显示密码，先验证，验证通过后容许查看
+      _checkAuthority(){
+        const self = this;
+        axios.post("/accounts/checkAuthority",{servicePwd: this.servicePwd}).then((res) => {
+          const result = res.data;
+          self.showViewModal = false;
+          if(!result.hasError && result.content && result.content.isSuccess){
+            self.currentRowData.isHidePwd = !self.currentRowData.isHidePwd;
+          } else {
+            self.showMessageModal = true;
+            self.modalContent = result.message;
+          }
+        });
+      },
+      _findIndex(value,arr,byKey){
+        // 从数组arr中找对应byKey值为value的index
+        for(let i = 0; i < arr.length; i++){
+          if(arr[i][byKey] === value){
             return i;
           }
         }
@@ -190,6 +239,32 @@
           return;
         }
         this.showMessageModal = false;
+        axios.post("/accounts/editAccount",{accountData:this.formData}).then((result) => {
+          const res = result.data;
+          if(res.content && res.content.isSuccess){
+            this.modalType = 'success';
+            this._closeDialogModal();
+            this.loadData();
+          }else{
+            this.modalType = 'error';
+          }
+          this.modalContent = res.message;
+          this.showMessageModal = true;
+        });
+      },
+      _onDeleteAccount(){
+        const self = this;
+        axios.post("/accounts/deleteAccount",{accountId:this.currentRowData._id}).then((result) => {
+          const res = result.data;
+          if(res.content && res.content.isSuccess){
+            this.modalType = 'success';
+            this.loadData();
+          }else{
+            this.modalType = 'error';
+          }
+          this.modalContent = res.message;
+          this.showMessageModal = true;
+        });
       },
       onModalCancel(){
         this._closeDialogModal();
@@ -200,7 +275,12 @@
       loadData(){
         axios.get("/accounts/list").then((res) => {
           const content = res.data.content;
-          this.tableData = content.retValue;
+          if(content.retValue && content.retValue.length){
+            content.retValue.forEach((item) => {
+              item.isHidePwd = true;
+            });
+            this.tableData = content.retValue;
+          }
         });
       }
     },
