@@ -1,3 +1,8 @@
+import { phoneList } from './utils'
+const phone = {"":""};
+phoneList.forEach((item) => {
+  phone[item]=item;
+});
 export default {
   fields: ['platform','account','password','email','phone','description'],
   labels: {
@@ -12,8 +17,8 @@ export default {
     platform: 'Text',
     account: 'Text',
     password: 'Password',
-    email: 'Text',
-    phone: 'Text',
+    email: 'Select',
+    phone: 'Select',
     description: 'TEXTAREA'
   },
   props: {
@@ -26,5 +31,9 @@ export default {
     password: {
       required: true
     }
+  },
+  options:{
+    email:{'':'','13065589219@163.com':'13065589219@163.com','houjievip1@sina.com':'houjievip1@sina.com'},
+    phone
   }
 };

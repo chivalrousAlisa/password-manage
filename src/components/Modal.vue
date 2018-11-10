@@ -35,7 +35,7 @@ props:
                   <button type="button" class="btn" @click="onCancel">
                     <span>取 消</span>
                   </button>
-                  <button type="button" class="btn btn-primary" @click="onOk">
+                  <button type="button" class="btn btn-primary" @click="onOk" @keyup.enter="onOk">
                     <span>确 定</span>
                   </button>
                 </p>
@@ -53,7 +53,7 @@ props:
               <button type="button" class="btn" @click="onCancel">
                 <span>取 消</span>
               </button>
-              <button type="button" class="btn btn-primary" @click="onOk">
+              <button type="button" class="btn btn-primary" @click="onOk" v-on:keyup.13="$emit('okBack')">
                 <span>确 定</span>
               </button>
             </div>

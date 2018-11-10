@@ -19,3 +19,12 @@ export const actionConfig = [{
   key:'del',
   value:'删除'
 }];
+export const phoneList = [
+  "13065589219",
+  "17051339218",
+  "17630982468",
+  "15294711250",
+  "15937626736",
+  "18668049618"
+];
+export const appHost = "//localhost:4200";

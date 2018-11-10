@@ -4,7 +4,8 @@ import Vuex from 'vuex';
 import App from './App';
 import router from './router';
 import './assets/css/base.css';
-
+import toastRegistry from './components/Toast';
+Vue.use(toastRegistry);
 // Vue.use(Vuex);
 //
 // const store = new Vuex.Store({

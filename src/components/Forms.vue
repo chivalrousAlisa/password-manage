@@ -18,8 +18,8 @@ props:
           <select v-else-if="config['types'][item]==='Select'" v-bind:value="data[item]" v-on:change="$emit('changeBack', $event.target.value, item)">
             <option v-bind:value="key" v-for="(value, key) in config['options'][item]">{{value}}</option>
           </select>
-          <textarea v-else-if="config['types'][item]==='TEXTAREA'" rows="5" v-on:input="$emit('changeBack', $event.target.value, item)">{{data[item]}}</textarea>
-          <input type="text" v-else>
+          <textarea v-else-if="config['types'][item]==='TEXTAREA'" rows="5" v-on:input="$emit('changeBack', $event.target.value, item)" v-bind:value="data[item]"></textarea>
+          <input type="text" v-else v-bind:value="data[item]" v-on:input="$emit('changeBack', $event.target.value, item)">
         </div>
       </div>
     </form>

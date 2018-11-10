@@ -21,7 +21,10 @@ props:
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item0, index0) in dataSource" :key="index0">
+        <tr v-if="dataSource.length=='0'">
+          <td style="text-align:center;" :colspan="columns.length">暂无数据</td>
+        </tr>
+        <tr v-for="(item0, index0) in dataSource" :key="index0" v-else>
           <td v-for="(item1,index1) in columns" :key="index1">
             <div v-if="item1.render && typeof item1.render === 'function'" v-html="item1.render(item0, dataSource, index0)">
             </div>

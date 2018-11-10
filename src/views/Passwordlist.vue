@@ -10,6 +10,13 @@
           <label for="">平台</label>
           <input type="text" v-model="searchData.platform"/>
         </li>
+        <li class="search-item lf">
+          <label for="">手机号</label>
+          <select type="text" v-model="searchData.phone">
+            <option value=""></option>
+            <option v-for="item in phoneList" :value="item">{{item}}</option>
+          </select>
+        </li>
       </ul>
       <div class="search-bar">
         <button type="button" class="btn btn-primary" @click="onSearch">查询</button>&nbsp;&nbsp;&nbsp;
@@ -88,10 +95,13 @@
     padding-bottom:25px;
     border-bottom:1px solid #ddd;
   }
-  .search-item input{
-    width:75%;
+  .search-item input, .search-item select{
+    width:73%;
   }
   .search-item label{
+    display:inline-block;
+    width:60px;
+    text-align: right;
     padding-right:10px;
   }
   .search-form{
@@ -102,6 +112,7 @@
   }
   .search-item{
     width:50%;
+    padding:10px 0;
   }
   .search-bar{
     text-align: center;
@@ -120,7 +131,7 @@
   import modal from '../components/Modal';
   import forms from '../components/Forms';
   import axios from 'axios';
-  import { pwdRenderFn } from './config/utils';
+  import { pwdRenderFn, phoneList, appHost } from './config/utils';
   export default {
     data(){
       return {
@@ -129,11 +140,10 @@
         tableData:[],
         currentRowData:{},
         pwdRenderFn,
+        phoneList,
+        appHost,
 
-        searchData:{
-          account:'',
-          platform:''
-        },
+        searchData:{},
 
         showModal:false,
         modalType:'',
@@ -155,12 +165,14 @@
     },
     methods:{
       onSearch(){
-        console.log(this.searchData);
+        this.loadData();
       },
       onClear(){
         this.searchData = {};
       },
       onModifyAccount(type,rowData={}){
+        // this.$toast('woashi');
+        // return;
         if(type === 'add'){
           this.formData = {};
           this.modalTitle = '新增账户'
@@ -196,7 +208,7 @@
       // 显示密码，先验证，验证通过后容许查看
       _checkAuthority(){
         const self = this;
-        axios.post("/accounts/checkAuthority",{servicePwd: this.servicePwd}).then((res) => {
+        axios.post(this.appHost + "/accounts/checkAuthority",{servicePwd: this.servicePwd}).then((res) => {
           const result = res.data;
           self.showViewModal = false;
           if(!result.hasError && result.content && result.content.isSuccess){
@@ -239,7 +251,7 @@
           return;
         }
         this.showMessageModal = false;
-        axios.post("/accounts/editAccount",{accountData:this.formData}).then((result) => {
+        axios.post(this.appHost + "/accounts/editAccount",{accountData:this.formData}).then((result) => {
           const res = result.data;
           if(res.content && res.content.isSuccess){
             this.modalType = 'success';
@@ -254,7 +266,7 @@
       },
       _onDeleteAccount(){
         const self = this;
-        axios.post("/accounts/deleteAccount",{accountId:this.currentRowData._id}).then((result) => {
+        axios.post(this.appHost + "/accounts/deleteAccount",{accountId:this.currentRowData._id}).then((result) => {
           const res = result.data;
           if(res.content && res.content.isSuccess){
             this.modalType = 'success';
@@ -273,9 +285,12 @@
         this.formData[attrName] = value
       },
       loadData(){
-        axios.get("/accounts/list").then((res) => {
+        axios.get(this.appHost + "/accounts/list",{params:{searchData:this.searchData}}).then((res) => {
+          if(res.data.hasError){
+            return;
+          }
           const content = res.data.content;
-          if(content.retValue && content.retValue.length){
+          if(content.retValue){
             content.retValue.forEach((item) => {
               item.isHidePwd = true;
             });
